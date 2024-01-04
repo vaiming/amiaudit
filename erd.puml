@@ -1,0 +1,289 @@
+@startuml
+
+'hide the spot
+hide circle
+
+'avoid problems with angled crows feet
+'skinparam linetype ortho
+'skinparam monochrome true
+'skinparam handwritten true
+skinparam backgroundColor #EEEBDC
+skinparam roundcorner 5
+
+' Users
+entity "**admins**" as an {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *nama : VARCHAR
+  *username : VARCHAR
+  *email : VARCHAR
+  *password : VARCHAR
+  profile_photo_path : VARCHAR
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**auditors**" as auditor {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *nama : VARCHAR
+  *username : VARCHAR
+  *email : VARCHAR
+  *password : VARCHAR
+  profile_photo_path : VARCHAR
+  unit_kerja_id : VARCHAR <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**auditees**" as auditee {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *nama : VARCHAR
+  *username : VARCHAR <<UNIQUE>>
+  *email : VARCHAR
+  *password : VARCHAR
+  profile_photo_path : VARCHAR
+  *unit_kerja_id : VARCHAR <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**migrations**" as migrations {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *migration : VARCHAR
+  *batch : INT
+}
+
+entity "**riwayat_audits**" as riwayat_audit {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *nomor_dokumen : VARCHAR
+  *status_revisi : VARCHAR
+  *status_revisi : DATETIME
+  *halaman : VARCHAR
+  *ketua_tim_auditor : VARCHAR
+  *kaur_sai : VARCHAR
+  *kabag_sekpim_legal_audit : VARCHAR
+
+  *lokasi : VARCHAR
+  *tanggal_rencana : DATETIME
+  *unit_kerja_id : VARCHAR <<FK>>
+  *auditee_id : UNSIGNED BIGINT <<FK>>
+  *ruang_lingkup_id : UNSIGNED BIGINT <<FK>>
+
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**auditor_riwayat_audit**" as auditor_riwayat_audit {
+  --
+  *riwayat_audit_id : UNSIGNED BIGINT <<FK>>
+  *auditor_id : UNSIGNED BIGINT <<FK>>
+}
+
+entity "**rencana_audits**" as rencana_audit {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *sub_unit_kerja : VARCHAR
+  *dokumen : VARCHAR
+
+  *standar_kriteria_id : UNSIGNED BIGINT <<FK>>
+  *auditee_id : UNSIGNED BIGINT <<FK>>
+  *auditor_id : UNSIGNED BIGINT <<FK>>
+  *riwayat_audit_id : UNSIGNED BIGINT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**checklist_audits**" as checklist {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *tentatif_audit_objektif : VARCHAR
+  *tujuan : VARCHAR
+
+  *is_approved_by_admin : TINYINT
+  *is_approved_by_auditor : TINYINT
+  *is_marked_as_audit_completed : TINYINT
+  *is_marked_as_ptk : TINYINT
+
+  *standar_kriteria_id : UNSIGNED BIGINT <<FK>>
+  *pernyataan_standar_id : UNSIGNED BIGINT <<FK>>
+  *indikator_id : UNSIGNED BIGINT <<FK>>
+  *measure_id : UNSIGNED BIGINT <<FK>>
+  *auditor_id : UNSIGNED BIGINT <<FK>>
+  *auditee_id : UNSIGNED BIGINT <<FK>>
+  *riwayat_audit_id : UNSIGNED BIGINT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**langkah_kerja_checklists**" as langkah_kerja_checklist {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *langkah_kerja : VARCHAR
+  *is_audited : TINYINT
+  *checklist_audit_id : UNSIGNED BIGINT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**p_t_k_s**" as ptk {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *type : VARCHAR
+  *problem : VARCHAR
+  *location : VARCHAR
+  *objective : VARCHAR
+  *reference : VARCHAR
+
+  *analisa_akar_masalah : VARCHAR
+  *akibat : VARCHAR
+  *permintaan_tindakan_koreksi : VARCHAR
+  *rencana_tindakan_perbaikan : VARCHAR
+  *rencana_pencegahan : VARCHAR
+
+  *repairing_datetime_start : DATETIME
+  *repairing_datetime_finish : DATETIME
+
+  *is_completed : TINYINT
+  *is_approved_by_auditee : TINYINT
+  *is_approved_by_auditor : TINYINT
+  *is_approved_with_repaired_by_auditee : TINYINT
+  *is_approved_with_repaired_by_auditor : TINYINT
+
+  *checklist_audit_id : UNSIGNED BIGINT <<FK>>
+  *auditor_id : UNSIGNED BIGINT <<FK>>
+  *auditee_id : UNSIGNED BIGINT <<FK>>
+  *penanggung_jawab_perbaikan : VARCHAR <<FK>>
+  *riwayat_audit_id : UNSIGNED BIGINT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**attendances**" as attend {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *name : VARCHAR
+  *origin : VARCHAR
+  *riwayat_audit_id : UNSIGNED BIGINT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' Standar Audit Internal
+entity "**unit_kerjas**" as unit_kerja {
+  *id : VARCHAR <<PK>>
+  --
+  *nama : VARCHAR <<UNIQUE>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**standar_kriterias**" as standar_kriteria {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *nama : VARCHAR <<UNIQUE>>
+  *kategori : VARCHAR
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**pernyataan_standars**" as pernyataan_standar {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *pernyataan_standar : VARCHAR
+  *standar_kriteria_id : UNSIGNED BIGINT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**pernyataan_standar_unit_kerjas**" as pernyataan_standar_unit_kerjas {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *unit_kerja_id : VARCHAR <<FK>>
+  *standar_kriteria_id : UNSIGNED BIGINT <<FK>>
+  *pernyataan_standar_id : UNSIGNED BIGINT <<FK>>
+}
+
+entity "**indikators**" as indikator {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *indikator : VARCHAR
+  *pernyataan_standar_id : UNSIGNED BIGINT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**measures**" as measures {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *measure : VARCHAR
+  *pernyataan_standar_id : UNSIGNED BIGINT <<FK>>
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "**measure_unit_kerja**" as measure_unit_kerja {
+  --
+  *measure_id : UNSIGNED BIGINT <<FK>>
+  *pernyataan_standar_unit_kerja_id : UNSIGNED BIGINT <<FK>>
+}
+
+entity "**ruang_lingkups**" as ruang_lingkup {
+  *id : UNSIGNED BIGINT <<PK>>
+  --
+  *semester : VARCHAR
+  *tahun_ajaran_mulai : VARCHAR
+  *tahun_ajaran_selesai : VARCHAR
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+'Defining relation
+standar_kriteria ||--o{ pernyataan_standar_unit_kerjas
+standar_kriteria ||--|{ pernyataan_standar
+pernyataan_standar ||--|{ indikator
+pernyataan_standar ||--|{ measures
+
+measures ||--o{ measure_unit_kerja
+measures ||--|{ checklist
+indikator ||--|{ checklist
+measure_unit_kerja }o--|| pernyataan_standar_unit_kerjas
+
+
+unit_kerja ||--o{ pernyataan_standar_unit_kerjas
+pernyataan_standar_unit_kerjas }o--|| pernyataan_standar
+
+unit_kerja ||--o{ auditee
+unit_kerja |o--o{ auditor
+unit_kerja ||--o{ riwayat_audit
+
+
+ruang_lingkup ||--o{ riwayat_audit
+auditee ||--o{ riwayat_audit
+
+riwayat_audit ||--o{ auditor_riwayat_audit
+auditor_riwayat_audit }o--|| auditor
+
+riwayat_audit ||--o{ rencana_audit
+riwayat_audit ||--o{ checklist
+riwayat_audit ||--o{ ptk
+riwayat_audit ||--o{ attend
+
+auditor ||--o{ rencana_audit
+auditor ||--o{ checklist
+auditor ||--o{ ptk
+
+auditee ||--o{ rencana_audit
+auditee ||--o{ checklist
+auditee ||--o{ ptk
+
+rencana_audit }o--|| standar_kriteria
+checklist }o--|| standar_kriteria
+
+checklist ||--o{ langkah_kerja_checklist
+@enduml
+
+
